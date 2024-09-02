@@ -23,6 +23,7 @@ const TerminalController = ({terminalControllerShow, setTerminalControllerShow, 
     const shouldScrollRef = useRef(true);
 
     useEffect(() => {
+
         // Create a new EventSource instance to listen to the SSE endpoint
         const eventSource = new EventSource('https://localhost/lac');
 
