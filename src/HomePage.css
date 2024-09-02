@@ -1,0 +1,9 @@
+body {
+    background-color: #0093E9;
+    background-image: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%);
+    min-height: 100vh; /* This will ensure that the background covers full view port height */
+}
+
+.popover{
+    max-width: 100% !important; /* Max Width of the popover (depending on the container!) */
+}

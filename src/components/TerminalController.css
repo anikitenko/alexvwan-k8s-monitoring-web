@@ -1,0 +1,37 @@
+.custom-terminal-wrapper {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    z-index: 9999; /* Ensure this is the highest on your page */
+    width: 45%; /* Adjust the width as needed */
+}
+
+.minimized {
+    height: 50px;
+    overflow: hidden;  /* Hide terminal content */
+}
+
+.terminal-loading {
+    font-weight: bold;
+    display:inline-block;
+    font-family: monospace;
+    font-size: 13px;
+    clip-path: inset(0 3ch 0 0);
+    animation: l 1s steps(4) infinite;
+}
+
+@keyframes l {
+    to {
+        clip-path: inset(0 -1ch 0 0)
+    }
+}
+
+.react-terminal-wrapper {
+    border-radius: 14px;
+    font-size: 13px;
+}
+
+.terminal-content {
+    height: 100%;
+    overflow-y: auto;
+}

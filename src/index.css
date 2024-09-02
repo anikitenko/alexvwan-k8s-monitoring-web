@@ -11,3 +11,8 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.dark_modal .modal-content {
+  background-color: #0093E9;
+  color: #fff;
+}
