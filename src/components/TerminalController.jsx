@@ -4,28 +4,36 @@ import Terminal, {ColorMode, TerminalOutput} from 'react-terminal-ui';
 import './TerminalController.css'
 import {ErrorHandlingToastContext} from "../ErrorHandlingToastContext";
 import Button from "react-bootstrap/Button";
-
-const mergeUnique = (arr1, arr2) => {
-    const mergedArray = arr1.concat(arr2);
-
-    // Create a map to track unique items by their time
-    return mergedArray.filter(
-        (item, index, self) =>
-            index === self.findIndex((t) => t.time === item.time)
-    );
-};
+import GetApiRequest from "./GetApiRequest";
 
 const TerminalController = ({terminalControllerShow, setTerminalControllerShow, terminalControllerShowMinimized, setTerminalControllerShowMinimized}) => {
     const errorHandler = useContext(ErrorHandlingToastContext)
     const [terminalLineData, setTerminalLineData] = useState([]);
-    const [terminalLogs, setTerminalLogs] = useState([]);
     const terminalRef = useRef(null);
     const shouldScrollRef = useRef(true);
 
+    const currentTime = new Date().toISOString();
+    const [firstDocumentTime, setFirstDocumentTime] = useState(currentTime);
+
     useEffect(() => {
+        GetApiRequest(
+            '/lac-data?time=' + currentTime,
+            'TerminalController',
+            data => {
+                let terminalLines = [];
+                data.forEach((element) => {
+                    terminalLines.push(<TerminalOutput key={element.time}>[{element.time}][{element.type}]: {element.message}</TerminalOutput>)
+                });
+                setFirstDocumentTime(data[0].time);
+                setTerminalLineData(terminalLines);
+            },
+            error => {
+                errorHandler.addToast(error, 'danger');
+            }
+        )
 
         // Create a new EventSource instance to listen to the SSE endpoint
-        const eventSource = new EventSource('https://localhost/lac');
+        const eventSource = new EventSource('https://localhost/lac?time=' + currentTime);
 
         // Listen for messages (events) from the server
         eventSource.onmessage = (event) => {
@@ -36,13 +44,12 @@ const TerminalController = ({terminalControllerShow, setTerminalControllerShow, 
 
             // Parse the event data (which should be in JSON format)
             const newLogs = JSON.parse(event.data);
-            const uniqueLogs = mergeUnique(terminalLogs, newLogs)
-            let terminalLines = [];
-            uniqueLogs.forEach((element) => {
-                terminalLines.push(<TerminalOutput key={element.time}>[{element.time}][{element.type}]: {element.message}</TerminalOutput>)
-            });
-            setTerminalLineData(terminalLines);
-            setTerminalLogs(uniqueLogs);
+            const newTerminalLines = newLogs.map((element) => (
+                <TerminalOutput key={element.time}>
+                    [{element.time}][{element.type}]: {element.message}
+                </TerminalOutput>
+            ));
+            setTerminalLineData((prevItems) => [...prevItems, newTerminalLines]);
         };
 
         // Handle errors (e.g., server disconnected, network issues)
@@ -67,7 +74,7 @@ const TerminalController = ({terminalControllerShow, setTerminalControllerShow, 
 
     return (
         <div className={`custom-terminal-wrapper ${terminalControllerShowMinimized ? 'minimized' : ''}`} hidden={!terminalControllerShow}>
-            <Terminal name='Activity Console' colorMode={ColorMode.Dark} height='100pt'
+            <Terminal name='Activity Console' colorMode={ColorMode.Dark} height='180pt'
                       redBtnCallback={() => setTerminalControllerShow(false)}
                       yellowBtnCallback={() => setTerminalControllerShowMinimized(true)}
                       greenBtnCallback={() => setTerminalControllerShowMinimized(false)}>
